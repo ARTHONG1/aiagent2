@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f7f8fa">
+  <title>Paper Insight · AI Research Agent</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-2: #f2f4f6;
+      --surface-blue: #eef6ff;
+      --text: #191f28;
+      --text-2: #4e5968;
+      --text-3: #8b95a1;
+      --line: #e5e8eb;
+      --blue: #3182f6;
+      --blue-dark: #1b64da;
+      --green: #20b26b;
+      --orange: #f59f00;
+      --red: #e5484d;
+      --shadow: 0 14px 40px rgba(25, 31, 40, 0.07);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --max: 1160px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--text);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+        "Noto Sans KR", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      word-break: keep-all;
+    }
+
+    button, input { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+
+    .shell {
+      width: min(calc(100% - 40px), var(--max));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid rgba(229, 232, 235, 0.82);
+      background: rgba(247, 248, 250, 0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 0;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      font-size: 20px;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 7px 18px rgba(49, 130, 246, 0.25);
+    }
+
+    .brand-mark svg { width: 19px; height: 19px; }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: #edf8f2;
+      color: #178654;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(32, 178, 107, .12);
+    }
+
+    .hero {
+      padding: 92px 0 112px;
+      min-height: calc(100vh - 72px);
+      display: grid;
+      align-items: center;
+    }
+
+    .hero-inner {
+      max-width: 850px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--blue-dark);
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow-icon {
+      width: 25px;
+      height: 25px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--blue);
+      font-size: 13px;
+      box-shadow: 0 6px 14px rgba(49,130,246,.22);
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(43px, 7vw, 74px);
+      line-height: 1.09;
+      letter-spacing: -.065em;
+      font-weight: 850;
+    }
+
+    .hero-copy {
+      margin: 25px auto 0;
+      max-width: 650px;
+      color: var(--text-2);
+      font-size: clamp(17px, 2vw, 20px);
+      line-height: 1.72;
+      letter-spacing: -.02em;
+    }
+
+    .search-panel {
+      position: relative;
+      margin: 46px auto 0;
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      max-width: 760px;
+      border: 1px solid var(--line);
+      border-radius: 23px;
+      background: var(--surface);
+      box-shadow: 0 18px 50px rgba(25, 31, 40, .1);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    .search-panel:focus-within {
+      border-color: rgba(49, 130, 246, .55);
+      box-shadow: 0 18px 55px rgba(49, 130, 246, .13), 0 0 0 4px rgba(49,130,246,.08);
+    }
+
+    .search-icon {
+      width: 44px;
+      flex: 0 0 44px;
+      display: grid;
+      place-items: center;
+      color: var(--text-3);
+    }
+
+    .search-icon svg { width: 21px; height: 21px; }
+
+    #userInput {
+      min-width: 0;
+      width: 100%;
+      height: 58px;
+      border: 0;
+      outline: 0;
+      color: var(--text);
+      background: transparent;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -.025em;
+    }
+
+    #userInput::placeholder { color: #adb5bd; font-weight: 500; }
+
+    .primary-button {
+      flex: 0 0 auto;
+      min-width: 118px;
+      height: 58px;
+      padding: 0 24px;
+      border: 0;
+      border-radius: 17px;
+      color: #fff;
+      background: var(--blue);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      transition: transform .15s, background .15s, opacity .15s;
+    }
+
+    .primary-button:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .primary-button:active { transform: translateY(0); }
+    .primary-button:disabled { cursor: not-allowed; opacity: .48; transform: none; }
+
+    .suggestions {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .suggestion {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 650;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+
+    .suggestion:hover { color: var(--blue-dark); border-color: #bcd6fb; background: #fff; }
+
+    .trust-row {
+      margin-top: 42px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 22px;
+      color: var(--text-3);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .trust-row span { display: inline-flex; align-items: center; gap: 7px; }
+    .trust-check { color: var(--blue); font-weight: 900; }
+
+    .agent-view { padding: 50px 0 100px; }
+
+    .run-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .run-header h1 {
+      margin: 6px 0 0;
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.18;
+      letter-spacing: -.055em;
+    }
+
+    .muted-label {
+      margin: 0;
+      color: var(--text-3);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .run-actions { display: flex; align-items: center; gap: 10px; }
+
+    .timer {
+      min-width: 74px;
+      height: 44px;
+      padding: 0 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--text-2);
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 750;
+      border: 1px solid var(--line);
+    }
+
+    .secondary-button {
+      height: 44px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .secondary-button:hover { background: var(--surface-2); }
+
+    .progress-card {
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .progress-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .progress-title { font-size: 15px; font-weight: 800; }
+    .progress-count { color: var(--blue-dark); font-size: 14px; font-weight: 800; }
+
+    .progress-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .progress-fill {
+      width: 2%;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+      transition: width .55s cubic-bezier(.22,1,.36,1);
+    }
+
+    .agent-grid {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(330px, .9fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .activity-card, .timeline-card, .partial-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--surface);
+    }
+
+    .activity-card {
+      min-height: 420px;
+      padding: 34px;
+      position: sticky;
+      top: 92px;
+      overflow: hidden;
+    }
+
+    .activity-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      top: -140px;
+      right: -100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(49,130,246,.12), rgba(49,130,246,0) 70%);
+      pointer-events: none;
+    }
+
+    .agent-orb {
+      width: 68px;
+      height: 68px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border-radius: 23px;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 14px 30px rgba(49,130,246,.25);
+    }
+
+    .agent-orb svg { width: 31px; height: 31px; }
+
+    .agent-orb.running::before,
+    .agent-orb.running::after {
+      content: "";
+      position: absolute;
+      inset: -6px;
+      border: 2px solid rgba(49,130,246,.2);
+      border-radius: 28px;
+      animation: orbPulse 2s ease-out infinite;
+    }
+
+    .agent-orb.running::after { animation-delay: 1s; }
+
+    @keyframes orbPulse {
+      0% { opacity: 0; transform: scale(.88); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: scale(1.22); }
+    }
+
+    .activity-status {
+      margin-top: 34px;
+      color: var(--blue-dark);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: .04em;
+    }
+
+    .activity-card h2 {
+      margin: 10px 0 0;
+      max-width: 520px;
+      font-size: clamp(27px, 4vw, 39px);
+      line-height: 1.22;
+      letter-spacing: -.052em;
+    }
+
+    .activity-copy {
+      min-height: 54px;
+      margin: 18px 0 0;
+      max-width: 540px;
+      color: var(--text-2);
+      line-height: 1.7;
+      letter-spacing: -.018em;
+    }
+
+    .activity-meta {
+      margin-top: 30px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: var(--text-3);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .stream-indicator { display: inline-flex; align-items: center; gap: 9px; }
+
+    .stream-bars { display: inline-flex; align-items: flex-end; gap: 3px; height: 15px; }
+    .stream-bars i { width: 3px; border-radius: 3px; background: var(--blue); animation: bars 1s ease-in-out infinite; }
+    .stream-bars i:nth-child(1) { height: 7px; }
+    .stream-bars i:nth-child(2) { height: 14px; animation-delay: .15s; }
+    .stream-bars i:nth-child(3) { height: 10px; animation-delay: .3s; }
+
+    @keyframes bars { 0%,100% { opacity: .35; transform: scaleY(.55); } 50% { opacity: 1; transform: scaleY(1); } }
+
+    .timeline-card { padding: 18px; }
+
+    .stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 14px;
+      padding: 15px;
+      border-radius: 18px;
+      transition: background .25s, transform .25s;
+    }
+
+    .stage + .stage { margin-top: 2px; }
+    .stage.active { background: var(--surface-blue); transform: translateX(-3px); }
+
+    .stage-icon {
+      width: 44px;
+      height: 44px;
+      position: relative;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: var(--surface-2);
+      color: var(--text-3);
+      font-size: 14px;
+      font-weight: 850;
+      transition: color .25s, background .25s, box-shadow .25s;
+    }
+
+    .stage.active .stage-icon {
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 8px 18px rgba(49,130,246,.22);
+    }
+
+    .stage.done .stage-icon { color: #148552; background: #eaf8f1; }
+    .stage.failed .stage-icon { color: var(--red); background: #fff0f0; }
+
+    .stage-copy { min-width: 0; padding-top: 2px; }
+    .stage-title { font-size: 15px; font-weight: 800; letter-spacing: -.02em; }
+    .stage-detail {
+      margin-top: 5px;
+      color: var(--text-3);
+      font-size: 13px;
+      line-height: 1.5;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .stage.active .stage-detail { color: #5b7eae; }
+    .stage-state { position: absolute; right: 16px; top: 16px; color: var(--blue); font-size: 12px; font-weight: 800; }
+
+    .partial-results {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .partial-card {
+      min-height: 128px;
+      padding: 22px;
+      animation: riseIn .45s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    .partial-label { color: var(--text-3); font-size: 12px; font-weight: 850; letter-spacing: .06em; text-transform: uppercase; }
+    .partial-value { margin-top: 10px; font-size: 18px; line-height: 1.45; font-weight: 800; letter-spacing: -.035em; }
+    .partial-note { margin-top: 7px; color: var(--text-3); font-size: 12px; line-height: 1.5; }
+
+    .error-card {
+      margin-top: 20px;
+      padding: 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      border: 1px solid #ffd2d2;
+      border-radius: var(--radius-lg);
+      background: #fff7f7;
+    }
+
+    .error-card strong { display: block; color: #b4232b; }
+    .error-card p { margin: 7px 0 0; color: #7d4b4e; font-size: 14px; line-height: 1.55; }
+
+    .result-view { padding: 58px 0 120px; }
+
+    .result-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 44px;
+    }
+
+    .completion {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #148552;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .completion-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--green);
+      box-shadow: 0 7px 16px rgba(32,178,107,.2);
+    }
+
+    .paper-hero {
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      color: #fff;
+      background: #17233c;
+      box-shadow: 0 24px 60px rgba(23,35,60,.18);
+    }
+
+    .paper-hero::after {
+      content: "";
+      position: absolute;
+      width: 430px;
+      height: 430px;
+      right: -160px;
+      top: -200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(91,153,255,.45), rgba(91,153,255,0) 68%);
+    }
+
+    .paper-hero > * { position: relative; z-index: 1; }
+
+    .paper-kicker {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 9px;
+      color: #a9c9fb;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    .paper-kicker span {
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .paper-title {
+      margin: 25px 0 0;
+      max-width: 940px;
+      font-size: clamp(38px, 6vw, 66px);
+      line-height: 1.1;
+      letter-spacing: -.06em;
+    }
+
+    .paper-original {
+      margin: 20px 0 0;
+      max-width: 900px;
+      color: #b8c2d5;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .paper-summary {
+      margin: 34px 0 0;
+      max-width: 900px;
+      color: #f4f7fb;
+      font-size: 20px;
+      line-height: 1.68;
+      font-weight: 650;
+      letter-spacing: -.025em;
+    }
+
+    .paper-links { margin-top: 35px; display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .paper-link {
+      padding: 12px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 13px;
+      color: #fff;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      font-size: 14px;
+      font-weight: 750;
+      transition: background .15s;
+    }
+    .paper-link:hover { background: rgba(255,255,255,.17); }
+
+    .status-banner {
+      margin-top: 18px;
+      padding: 17px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border-radius: 17px;
+      background: #fff7e8;
+      color: #7c5600;
+      font-size: 14px;
+      line-height: 1.55;
+      border: 1px solid #ffe0a3;
+    }
+
+    .section { padding-top: 96px; }
+    .section.compact { padding-top: 68px; }
+
+    .section-number { color: var(--blue); font-size: 13px; font-weight: 900; letter-spacing: .18em; }
+    .section h2 {
+      margin: 13px 0 0;
+      max-width: 720px;
+      font-size: clamp(32px, 5vw, 53px);
+      line-height: 1.13;
+      letter-spacing: -.058em;
+    }
+    .section-lead { margin: 17px 0 0; max-width: 720px; color: var(--text-2); line-height: 1.7; }
+
+    .metric-grid {
+      margin-top: 35px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .metric-card {
+      min-height: 255px;
+      padding: 27px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      box-shadow: 0 10px 30px rgba(25,31,40,.045);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .metric-top { display: flex; justify-content: space-between; gap: 12px; }
+    .metric-type { color: var(--blue-dark); font-size: 11px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+    .metric-source { color: var(--text-3); font-size: 11px; font-weight: 700; }
+    .metric-name { margin-top: 22px; color: var(--text-2); font-size: 14px; font-weight: 750; line-height: 1.45; }
+    .metric-value { margin-top: 8px; font-size: clamp(30px, 4vw, 43px); line-height: 1.1; font-weight: 850; letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+    .metric-description { margin-top: 12px; color: var(--text-3); font-size: 13px; line-height: 1.55; }
+
+    .bar-wrap { margin-top: auto; padding-top: 22px; }
+    .bar-row { display: grid; grid-template-columns: 38px 1fr; align-items: center; gap: 9px; margin-top: 8px; }
+    .bar-label { color: var(--text-3); font-size: 10px; font-weight: 800; }
+    .bar-track { height: 7px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+    .bar-value { height: 100%; border-radius: inherit; background: #b8c5d9; }
+    .bar-row.proposed .bar-value { background: var(--blue); }
+
+    .flow-list { margin-top: 34px; max-width: 940px; }
+    .flow-item { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 18px; position: relative; }
+    .flow-item:not(:last-child) { padding-bottom: 26px; }
+    .flow-item:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      top: 47px;
+      bottom: 0;
+      width: 2px;
+      background: var(--line);
+    }
+    .flow-index {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: var(--surface-blue);
+      color: var(--blue-dark);
+      font-weight: 900;
+    }
+    .flow-copy { padding: 10px 0 0; font-size: 17px; line-height: 1.65; font-weight: 650; letter-spacing: -.02em; }
+
+    .reason-grid, .evidence-grid, .visual-grid {
+      margin-top: 34px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .reason-card, .evidence-card, .visual-card, .summary-card, .limitations-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .reason-card { padding: 25px; display: flex; gap: 15px; line-height: 1.65; }
+    .reason-check { flex: 0 0 27px; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 9px; color: var(--blue-dark); background: var(--surface-blue); font-weight: 900; }
+
+    .summary-list { margin-top: 34px; display: grid; gap: 13px; }
+    .summary-card { overflow: hidden; }
+    .summary-button {
+      width: 100%;
+      padding: 25px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 20px;
+      border: 0;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+    }
+    .summary-category { color: var(--blue-dark); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .summary-title { margin-top: 7px; font-size: 17px; line-height: 1.5; font-weight: 800; letter-spacing: -.025em; }
+    .summary-toggle { color: var(--text-3); font-size: 22px; transition: transform .2s; }
+    .summary-card.open .summary-toggle { transform: rotate(45deg); }
+    .summary-body { display: none; padding: 0 25px 25px; color: var(--text-2); line-height: 1.72; }
+    .summary-card.open .summary-body { display: block; animation: fadeIn .2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .quote {
+      margin-top: 17px;
+      padding: 16px 18px;
+      border-left: 3px solid #9ec5fc;
+      border-radius: 0 12px 12px 0;
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .source { margin-top: 12px; color: var(--text-3); font-size: 12px; font-weight: 700; }
+
+    .evidence-card { padding: 24px; transition: transform .15s, border-color .15s; }
+    a.evidence-card:hover { transform: translateY(-2px); border-color: #bcd6fb; }
+    .evidence-domain { color: var(--blue-dark); font-size: 12px; font-weight: 850; }
+    .evidence-claim { margin-top: 12px; line-height: 1.65; font-weight: 650; }
+    .evidence-url { margin-top: 15px; color: var(--text-3); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .visual-card { padding: 25px; }
+    .visual-type { color: var(--blue-dark); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .visual-label { margin-top: 10px; font-size: 18px; font-weight: 850; }
+    .visual-caption { margin-top: 11px; color: var(--text-2); line-height: 1.6; }
+    .visual-reason { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 13px; line-height: 1.55; }
+
+    .limitations-card { margin-top: 34px; padding: 28px; background: #fcfcfd; }
+    .limitation { display: flex; gap: 14px; line-height: 1.65; }
+    .limitation + .limitation { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .limitation-dot { margin-top: 9px; flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); }
+
+    .empty-state {
+      margin-top: 30px;
+      padding: 30px;
+      border: 1px dashed #ccd3db;
+      border-radius: var(--radius-lg);
+      color: var(--text-3);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .footer {
+      padding: 32px 0 50px;
+      color: var(--text-3);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 60;
+      padding: 13px 18px;
+      transform: translate(-50%, 18px);
+      border-radius: 13px;
+      color: #fff;
+      background: rgba(25,31,40,.94);
+      box-shadow: 0 12px 32px rgba(0,0,0,.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s, transform .2s;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 900px) {
+      .agent-grid { grid-template-columns: 1fr; }
+      .activity-card { position: static; min-height: 0; }
+      .partial-results { grid-template-columns: 1fr 1fr; }
+      .metric-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .shell { width: min(calc(100% - 28px), var(--max)); }
+      .topbar-inner { height: 64px; }
+      .live-badge { display: none; }
+      .hero { min-height: calc(100vh - 64px); padding: 54px 0 74px; }
+      .hero h1 { font-size: 42px; }
+      .hero-copy { font-size: 16px; }
+      .search-panel { padding: 7px; border-radius: 20px; display: grid; grid-template-columns: 42px 1fr; }
+      #userInput { height: 52px; font-size: 16px; }
+      .primary-button { grid-column: 1 / -1; width: 100%; height: 52px; border-radius: 15px; }
+      .suggestions { justify-content: flex-start; }
+      .trust-row { gap: 13px; }
+      .run-header { align-items: flex-start; flex-direction: column; }
+      .run-actions { width: 100%; }
+      .timer { flex: 1; }
+      .progress-card { padding: 22px; border-radius: 22px; }
+      .activity-card { padding: 27px; border-radius: 22px; }
+      .activity-meta { align-items: flex-start; flex-direction: column; }
+      .timeline-card { border-radius: 22px; }
+      .partial-results, .metric-grid, .reason-grid, .evidence-grid, .visual-grid { grid-template-columns: 1fr; }
+      .paper-hero { padding: 32px 25px; border-radius: 25px; }
+      .paper-title { font-size: 39px; }
+      .paper-summary { font-size: 17px; }
+      .section { padding-top: 76px; }
+      .result-toolbar { align-items: flex-start; flex-direction: column; }
+      .result-toolbar .secondary-button { width: 100%; }
+      .metric-card { min-height: 230px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <button class="brand" id="brandButton" type="button" aria-label="처음 화면으로 이동">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 17.5V8.2c0-.8.4-1.5 1.1-1.9l3.8-2.1c.7-.4 1.5-.4 2.2 0l3.8 2.1c.7.4 1.1 1.1 1.1 1.9v4.4c0 .8-.4 1.5-1.1 1.9l-3.8 2.1c-.7.4-1.5.4-2.2 0L8.8 15.4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12.2 12 9l6 3.2M12 9v7.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Paper Insight
+      </button>
+      <div class="live-badge"><span class="live-dot"></span> AI AGENT LIVE</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="searchView">
+      <div class="shell hero-inner">
+        <div class="eyebrow"><span class="eyebrow-icon">AI</span> RESEARCH AGENT</div>
+        <h1>궁금한 AI 연구를<br>한 편의 인사이트로</h1>
+        <p class="hero-copy">최신 논문을 찾고, 영향력을 검증하고, PDF 속 핵심 수치까지 읽어<br>이해하기 쉬운 연구 리포트로 정리해요.</p>
+
+        <form class="search-panel" id="searchForm">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <input id="userInput" type="text" autocomplete="off" maxlength="500" placeholder="어떤 AI 연구가 궁금한가요?" aria-label="논문 검색 질문">
+          <button class="primary-button" id="sendButton" type="submit">분석 시작</button>
+        </form>
+
+        <div class="suggestions" aria-label="추천 검색어">
+          <button class="suggestion" type="button">최신 AI 에이전트 논문</button>
+          <button class="suggestion" type="button">멀티모달 추론 신기술</button>
+          <button class="suggestion" type="button">LLM 학습 효율화 연구</button>
+        </div>
+
+        <div class="trust-row" aria-label="서비스 기능">
+          <span><b class="trust-check">✓</b> 최근 arXiv 탐색</span>
+          <span><b class="trust-check">✓</b> 외부 영향력 검증</span>
+          <span><b class="trust-check">✓</b> PDF 근거 분석</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="agent-view" id="agentView" hidden aria-live="polite">
+      <div class="shell">
+        <div class="run-header">
+          <div>
+            <p class="muted-label">Live research</p>
+            <h1>Agent가 연구를 조사하고 있어요</h1>
+          </div>
+          <div class="run-actions">
+            <div class="timer" id="timer">00:00</div>
+            <button class="secondary-button" id="stopButton" type="button">분석 중지</button>
+          </div>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-head">
+            <div class="progress-title" id="progressTitle">질문을 전달하고 있어요</div>
+            <div class="progress-count" id="progressCount">0 / 6</div>
+          </div>
+          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <div class="agent-grid">
+          <article class="activity-card">
+            <div class="agent-orb running" id="agentOrb" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5 14.2 9l5.8 2.2-5.8 2.2L12 19l-2.2-5.6L4 11.2 9.8 9 12 3.5Z" fill="currentColor"/><path d="m18.2 3 .7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" fill="currentColor" opacity=".7"/></svg>
+            </div>
+            <div class="activity-status" id="activityStatus">AGENT STARTING</div>
+            <h2 id="activityTitle">질문을 이해하고 있어요</h2>
+            <p class="activity-copy" id="activityCopy">연구 범위와 핵심 키워드를 정리한 뒤 최신 논문 탐색을 시작합니다.</p>
+            <div class="activity-meta">
+              <span class="stream-indicator" id="streamIndicator">
+                <span class="stream-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+                SSE 실시간 연결
+              </span>
+              <span id="activityDetail">연결 준비 중</span>
+            </div>
+          </article>
+
+          <div class="timeline-card" id="timeline"></div>
+          <div class="partial-results" id="partialResults"></div>
+        </div>
+
+        <div class="error-card" id="errorCard" hidden role="alert">
+          <div><strong id="errorTitle">연결이 잠시 불안정해요</strong><p id="errorMessage">다시 시도해 주세요.</p></div>
+          <button class="secondary-button" id="retryButton" type="button">다시 시도</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="result-view" id="resultView" hidden>
+      <div class="shell">
+        <div class="result-toolbar">
+          <div class="completion"><span class="completion-icon">✓</span><span id="completionText">Agent 분석이 완료됐어요</span></div>
+          <button class="secondary-button" id="newSearchButton" type="button">새로운 연구 찾기</button>
+        </div>
+
+        <article class="paper-hero">
+          <div class="paper-kicker" id="paperKicker"></div>
+          <h1 class="paper-title" id="paperTitle"></h1>
+          <p class="paper-original" id="paperOriginal"></p>
+          <p class="paper-summary" id="paperSummary"></p>
+          <div class="paper-links" id="paperLinks"></div>
+        </article>
+        <div class="status-banner" id="statusBanner" hidden></div>
+
+        <section class="section" id="metricsSection">
+          <div class="section-number">01</div>
+          <h2>숫자가 증명한<br>연구의 결정적 장면</h2>
+          <p class="section-lead">서로 다른 단위의 지표를 섞지 않고, 논문에서 직접 확인한 수치만 유형별로 보여줍니다.</p>
+          <div class="metric-grid" id="metricGrid"></div>
+        </section>
+
+        <section class="section" id="flowSection">
+          <div class="section-number">02</div>
+          <h2>문제에서 결과까지<br>연구의 흐름</h2>
+          <div class="flow-list" id="flowList"></div>
+        </section>
+
+        <section class="section" id="reasonSection">
+          <div class="section-number">03</div>
+          <h2>Agent가 이 논문을<br>선택한 이유</h2>
+          <div class="reason-grid" id="reasonGrid"></div>
+        </section>
+
+        <section class="section" id="summarySection">
+          <div class="section-number">04</div>
+          <h2>핵심 내용을<br>근거와 함께 읽기</h2>
+          <div class="summary-list" id="summaryList"></div>
+        </section>
+
+        <section class="section" id="evidenceSection">
+          <div class="section-number">05</div>
+          <h2>웹에서 확인한<br>영향력 신호</h2>
+          <div class="evidence-grid" id="evidenceGrid"></div>
+        </section>
+
+        <section class="section" id="visualSection">
+          <div class="section-number">06</div>
+          <h2>논문에서 다시 볼<br>핵심 시각 자료</h2>
+          <div class="visual-grid" id="visualGrid"></div>
+        </section>
+
+        <section class="section compact" id="limitationsSection">
+          <div class="section-number">07</div>
+          <h2>함께 봐야 할 한계</h2>
+          <div class="limitations-card" id="limitationsList"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Paper Insight · AI가 찾고, 검증하고, 읽은 연구 인사이트</footer>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    "use strict";
+
+    const AGENT_ID = "6a5ab5941c4a469e7abe15f9";
+    const BASE_URL = "https://langbridge.kosac.laivdata.com";
+
+    const STAGES = [
+      { id: "understand", short: "01", title: "질문 이해", detail: "연구 범위를 정리하고 있어요", activity: "질문을 이해하고 있어요", copy: "연구 범위와 핵심 키워드를 정리한 뒤 최신 논문 탐색을 시작합니다." },
+      { id: "query", short: "02", title: "검색 전략 생성", detail: "정확한 학술 검색어를 만들어요", activity: "연구 검색어를 설계하고 있어요", copy: "사용자의 관심사를 모델, 학습법, 추론법과 같은 학술 검색 조건으로 변환합니다." },
+      { id: "arxiv", short: "03", title: "최신 논문 탐색", detail: "arXiv 후보를 비교하고 있어요", activity: "최신 논문 후보를 찾고 있어요", copy: "최근 공개된 원저 연구 중 비교 실험과 정량 결과가 있는 후보를 탐색합니다." },
+      { id: "impact", short: "04", title: "영향력 검증", detail: "외부 공개 신호를 확인해요", activity: "연구 영향력을 검증하고 있어요", copy: "공식 페이지, 공개 저장소와 독립적인 기술 자료를 확인해 가장 유망한 연구를 선정합니다." },
+      { id: "paper", short: "05", title: "PDF 근거 분석", detail: "본문의 수치와 근거를 읽어요", activity: "논문 PDF를 깊이 읽고 있어요", copy: "핵심 방법, 실험 수치, 인용 가능한 근거와 연구의 한계를 구조화합니다." },
+      { id: "report", short: "06", title: "리포트 구성", detail: "인사이트 화면을 만들어요", activity: "연구 인사이트를 정리하고 있어요", copy: "분석 결과를 핵심 수치와 연구 흐름 중심의 읽기 쉬운 리포트로 구성합니다." }
+    ];
+
+    const $ = (selector) => document.querySelector(selector);
+    const els = {
+      searchView: $("#searchView"), agentView: $("#agentView"), resultView: $("#resultView"),
+      searchForm: $("#searchForm"), userInput: $("#userInput"), sendButton: $("#sendButton"),
+      timeline: $("#timeline"), partialResults: $("#partialResults"), timer: $("#timer"),
+      progressTitle: $("#progressTitle"), progressCount: $("#progressCount"), progressFill: $("#progressFill"), progressTrack: $("#progressTrack"),
+      activityStatus: $("#activityStatus"), activityTitle: $("#activityTitle"), activityCopy: $("#activityCopy"), activityDetail: $("#activityDetail"),
+      agentOrb: $("#agentOrb"), streamIndicator: $("#streamIndicator"), stopButton: $("#stopButton"),
+      errorCard: $("#errorCard"), errorTitle: $("#errorTitle"), errorMessage: $("#errorMessage"), retryButton: $("#retryButton"),
+      toast: $("#toast")
+    };
+
+    let run = createRunState();
+    let abortController = null;
+    let timerHandle = null;
+    let lastQuery = "";
+    let toastHandle = null;
+
+    function createRunState() {
+      return {
+        startedAt: 0,
+        activeStage: -1,
+        stageStatus: STAGES.map(() => "waiting"),
+        stageDetails: STAGES.map(stage => stage.detail),
+        messageBuffers: {},
+        updates: [],
+        finalParams: null,
+        paper: null,
+        partialKeys: new Set(),
+        stopped: false
+      };
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]);
+    }
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(String(value));
+        return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+      } catch { return ""; }
+    }
+
+    function domainOf(value) {
+      try { return new URL(value).hostname.replace(/^www\./, ""); }
+      catch { return "외부 자료"; }
+    }
+
+    function cleanNodeName(name) {
+      if (!name) return "";
+      return String(name).replace(/__[a-z0-9-]+/ig, "").replace(/\.(search_arxiv|search_web|read_url)$/i, "").trim();
+    }
+
+    function stageFromName(rawName) {
+      const name = cleanNodeName(rawName).toLowerCase();
+      if (!name || name === "undefined") return -1;
+      if (name.includes("논문 분석") || name.includes("read_url") || name.includes("pdf")) return 4;
+      if (name.includes("search_web") || name.includes("영향력") || name.includes("최종 선정") || name.includes("검증")) return 3;
+      if (name.includes("search_arxiv") || name.includes("arxiv") || name.includes("후보 검색")) return 2;
+      if (name.includes("검색어") || name.includes("query") || name.includes("quey")) return 1;
+      if (name === "start" || name.includes("입력") || name.includes("시작")) return 0;
+      if (name.includes("report") || name.includes("리포트") || name.includes("최종 답변") || name.includes("번역")) return 5;
+      return -1;
+    }
+
+    function renderTimeline() {
+      els.timeline.innerHTML = STAGES.map((stage, index) => {
+        const status = run.stageStatus[index];
+        const stateText = status === "active" ? "진행 중" : status === "done" ? "완료" : status === "failed" ? "확인 필요" : "";
+        const icon = status === "done" ? "✓" : status === "failed" ? "!" : stage.short;
+        return `<div class="stage ${status}" data-stage="${index}">
+          <div class="stage-icon">${icon}</div>
+          <div class="stage-copy"><div class="stage-title">${escapeHTML(stage.title)}</div><div class="stage-detail">${escapeHTML(run.stageDetails[index])}</div></div>
+          ${stateText ? `<span class="stage-state">${stateText}</span>` : ""}
+        </div>`;
+      }).join("");
+    }
+
+    function setActiveStage(index, detail) {
+      if (index < 0 || index >= STAGES.length) return;
+      for (let i = 0; i < index; i++) {
+        if (run.stageStatus[i] !== "failed") run.stageStatus[i] = "done";
+      }
+      if (run.stageStatus[index] !== "done") run.stageStatus[index] = "active";
+      run.activeStage = Math.max(run.activeStage, index);
+      if (detail) run.stageDetails[index] = detail;
+      updateAgentUI(index);
+    }
+
+    function completeStage(index, detail) {
+      if (index < 0 || index >= STAGES.length) return;
+      run.stageStatus[index] = "done";
+      if (detail) run.stageDetails[index] = detail;
+      const next = index + 1;
+      if (next < STAGES.length && run.stageStatus[next] === "waiting") {
+        run.activeStage = next;
+      }
+      updateAgentUI(next < STAGES.length ? next : index, next < STAGES.length);
+    }
+
+    function updateAgentUI(index, previewNext = false) {
+      renderTimeline();
+      const completed = run.stageStatus.filter(status => status === "done").length;
+      const progress = Math.max(3, Math.round((completed / STAGES.length) * 100));
+      els.progressFill.style.width = `${progress}%`;
+      els.progressTrack.setAttribute("aria-valuenow", String(progress));
+      els.progressCount.textContent = `${completed} / ${STAGES.length}`;
+
+      const stage = STAGES[Math.min(Math.max(index, 0), STAGES.length - 1)];
+      els.activityStatus.textContent = previewNext ? "NEXT STEP" : `AGENT · ${String(index + 1).padStart(2, "0")}`;
+      els.activityTitle.textContent = stage.activity;
+      els.activityCopy.textContent = stage.copy;
+      els.progressTitle.textContent = run.stageStatus[index] === "done" ? `${stage.title}을 완료했어요` : stage.activity;
+    }
+
+    function updateTimer() {
+      if (!run.startedAt) return;
+      const elapsed = Math.max(0, Math.floor((Date.now() - run.startedAt) / 1000));
+      const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+      const seconds = String(elapsed % 60).padStart(2, "0");
+      els.timer.textContent = `${minutes}:${seconds}`;
+    }
+
+    function showView(view) {
+      els.searchView.hidden = view !== "search";
+      els.agentView.hidden = view !== "agent";
+      els.resultView.hidden = view !== "result";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetRunUI() {
+      run = createRunState();
+      els.partialResults.innerHTML = "";
+      els.errorCard.hidden = true;
+      els.agentOrb.classList.add("running");
+      els.activityDetail.textContent = "연결 준비 중";
+      els.streamIndicator.hidden = false;
+      els.stopButton.disabled = false;
+      els.stopButton.textContent = "분석 중지";
+      els.timer.textContent = "00:00";
+      renderTimeline();
+      updateAgentUI(0);
+      els.progressFill.style.width = "2%";
+      els.progressCount.textContent = `0 / ${STAGES.length}`;
+    }
+
+    function addPartialCard(key, label, value, note = "") {
+      const safeKey = String(key).replace(/[^a-z0-9_-]/gi, "");
+      let card = document.querySelector(`[data-partial="${safeKey}"]`);
+      if (!card) {
+        card = document.createElement("article");
+        card.className = "partial-card";
+        card.dataset.partial = safeKey;
+        els.partialResults.appendChild(card);
+      }
+      card.innerHTML = `<div class="partial-label">${escapeHTML(label)}</div><div class="partial-value">${escapeHTML(value)}</div>${note ? `<div class="partial-note">${escapeHTML(note)}</div>` : ""}`;
+      run.partialKeys.add(safeKey);
+    }
+
+    function parseJsonString(value) {
+      if (typeof value !== "string") return value;
+      let text = value.trim();
+      if (!text) return value;
+      text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+      for (let i = 0; i < 4; i++) {
+        try {
+          const parsed = JSON.parse(text);
+          if (typeof parsed === "string") { text = parsed.trim(); continue; }
+          return parsed;
+        } catch { break; }
+      }
+      const first = text.indexOf("{");
+      const last = text.lastIndexOf("}");
+      if (first >= 0 && last > first) {
+        try { return JSON.parse(text.slice(first, last + 1)); } catch { /* 그대로 반환 */ }
+      }
+      return value;
+    }
+
+    function deepParse(value, depth = 0) {
+      if (depth > 5) return value;
+      const parsed = parseJsonString(value);
+      if (Array.isArray(parsed)) return parsed.map(item => deepParse(item, depth + 1));
+      if (parsed && typeof parsed === "object") {
+        const result = {};
+        for (const [key, item] of Object.entries(parsed)) result[key] = deepParse(item, depth + 1);
+        return result;
+      }
+      return parsed;
+    }
+
+    function isPaperObject(value) {
+      return Boolean(value && typeof value === "object" && !Array.isArray(value) &&
+        (value.title_original || value.title_ko || value.title) &&
+        (value.summary || value.key_metrics || value.one_line_summary || value.research_flow || value.document_type || value.status));
+    }
+
+    function findPaperObject(input) {
+      const root = deepParse(input);
+      if (isPaperObject(root)) return root;
+      if (!root || typeof root !== "object") return null;
+
+      const preferred = ["answer", "answer2", "paper", "analysis", "result", "output", "data"];
+      for (const key of preferred) {
+        if (key in root) {
+          const candidate = deepParse(root[key]);
+          if (isPaperObject(candidate)) return candidate;
+          const nested = findPaperObject(candidate);
+          if (nested) return nested;
+        }
+      }
+      for (const value of Object.values(root)) {
+        if (value && typeof value === "object") {
+          const nested = findPaperObject(value);
+          if (nested) return nested;
+        }
+      }
+      return null;
+    }
+
+    function findCandidates(input) {
+      const value = deepParse(input);
+      if (!value || typeof value !== "object") return [];
+      if (Array.isArray(value.candidates)) return value.candidates;
+      for (const key of ["arxiv", "answer", "result", "data", "output"]) {
+        if (key in value) {
+          const found = findCandidates(value[key]);
+          if (found.length) return found;
+        }
+      }
+      return [];
+    }
+
+    function findSelected(input) {
+      const value = deepParse(input);
+      if (!value || typeof value !== "object") return null;
+      if ((value.title || value.title_original || value.title_ko) && value.arxiv_id && !value.summary) return value;
+      for (const key of ["url", "selected_paper", "selected_paper_json", "answer", "result", "data"]) {
+        if (key in value) {
+          const candidate = deepParse(value[key]);
+          if (candidate && typeof candidate === "object" && (candidate.title || candidate.title_original) && candidate.arxiv_id) return candidate;
+        }
+      }
+      return null;
+    }
+
+    function processUpdate(params, nodeName = "") {
+      const parsed = deepParse(params);
+      run.updates.push(parsed);
+      const stage = stageFromName(nodeName);
+
+      if (stage === 1 || parsed?.quey || parsed?.query || parsed?.search_query) {
+        const query = parsed?.quey || parsed?.query || parsed?.search_query;
+        if (typeof query === "string") addPartialCard("query", "Search strategy", query.replace(/<\/assistant>.*/g, "").trim(), "학술 검색어 생성 완료");
+      }
+
+      const candidates = findCandidates(parsed);
+      if (candidates.length) {
+        const title = candidates[0]?.title || "후보 논문 분석 중";
+        addPartialCard("candidates", "arXiv discovery", `${candidates.length}편의 후보 발견`, title);
+        run.stageDetails[2] = `${candidates.length}편의 후보를 비교했어요`;
+      }
+
+      const selected = findSelected(parsed);
+      if (selected) {
+        const evidence = Array.isArray(selected.impact_evidence) ? selected.impact_evidence.length : 0;
+        addPartialCard("selected", "Selected paper", selected.title || selected.title_original || selected.title_ko, evidence ? `외부 근거 ${evidence}개 확인` : `arXiv ${selected.arxiv_id}`);
+        run.stageDetails[3] = "최종 논문을 선정했어요";
+      }
+
+      const paper = findPaperObject(parsed);
+      if (paper) {
+        run.paper = paper;
+        const metrics = Array.isArray(paper.key_metrics) ? paper.key_metrics.length : 0;
+        const summaries = Array.isArray(paper.summary) ? paper.summary.length : 0;
+        addPartialCard("analysis", "PDF analysis", `근거 ${summaries}개 · 지표 ${metrics}개`, paper.title_ko || paper.title_original || paper.title);
+        run.stageDetails[4] = "수치와 핵심 근거를 구조화했어요";
+      }
+      renderTimeline();
+    }
+
+    function handleAgentChunk(chunk) {
+      if (!chunk || typeof chunk !== "object") return;
+      const type = chunk.type;
+
+      if (type === "event") {
+        const status = String(chunk.data?.status || "").toLowerCase();
+        const name = chunk.data?.name || "";
+        const stage = stageFromName(name);
+        if (stage >= 0) {
+          if (["finished", "complete", "completed", "success"].includes(status)) completeStage(stage);
+          else if (["error", "failed"].includes(status)) {
+            run.stageStatus[stage] = "failed";
+            renderTimeline();
+          } else setActiveStage(stage);
+          els.activityDetail.textContent = cleanNodeName(name) || STAGES[stage].title;
+        }
+        return;
+      }
+
+      if (type === "message") {
+        const name = chunk.data?.name || "agent";
+        const content = String(chunk.data?.content || "");
+        run.messageBuffers[name] = (run.messageBuffers[name] || "") + content;
+        const stage = stageFromName(name);
+        if (stage >= 0) setActiveStage(stage);
+        const length = run.messageBuffers[name].length;
+        els.activityDetail.textContent = `응답 구조화 중 · ${length.toLocaleString("ko-KR")}자`;
+        return;
+      }
+
+      if (type === "update") {
+        const params = chunk.data?.update?.params ?? chunk.data?.params ?? chunk.data;
+        const name = chunk.data?.update?.name || chunk.data?.name || "";
+        processUpdate(params, name);
+        const stage = stageFromName(name);
+        if (stage >= 0) completeStage(stage);
+        return;
+      }
+
+      if (type === "data") {
+        const params = chunk.data?.data?.params ?? chunk.data?.params ?? chunk.data;
+        run.finalParams = params;
+        processUpdate(params, chunk.data?.name || "");
+        const paper = findPaperObject(params);
+        if (paper) run.paper = paper;
+      }
+    }
+
+    function parseSSEBlock(block) {
+      const lines = block.split("\n");
+      const dataLines = [];
+      for (const line of lines) {
+        if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
+      }
+      if (!dataLines.length) return;
+      const payload = dataLines.join("");
+      try { handleAgentChunk(JSON.parse(payload)); }
+      catch (error) { console.warn("[Paper Insight] SSE JSON을 읽지 못했습니다.", error); }
+    }
+
+    async function postJson(url, data, options = {}) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        body: JSON.stringify(data),
+        signal: options.signal
+      });
+      if (!response.ok) {
+        let message = `요청에 실패했습니다. (HTTP ${response.status})`;
+        try {
+          const body = await response.json();
+          message = body.message || body.error || message;
+        } catch { /* 기본 메시지 사용 */ }
+        throw new Error(message);
+      }
+      return response;
+    }
+
+    async function startAgent(queryText) {
+      lastQuery = queryText;
+      resetRunUI();
+      showView("agent");
+      run.startedAt = Date.now();
+      updateTimer();
+      timerHandle = window.setInterval(updateTimer, 1000);
+      abortController = new AbortController();
+
+      try {
+        els.activityDetail.textContent = "세션을 생성하고 있어요";
+        const sessionResponse = await postJson(`${BASE_URL}/sessions`, { agentId: AGENT_ID }, { signal: abortController.signal });
+        const sessionData = await sessionResponse.json();
+        if (!sessionData.sessionId) throw new Error("세션 ID를 받지 못했습니다.");
+
+        setActiveStage(0, "질문을 Agent에 전달했어요");
+        els.activityDetail.textContent = "SSE 연결 중";
+
+        const response = await postJson(`${BASE_URL}/agents/run/sse`, {
+          sessionId: sessionData.sessionId,
+          query: { userInput: queryText }
+        }, {
+          signal: abortController.signal,
+          headers: { "Accept": "text/event-stream" }
+        });
+
+        if (!response.body) throw new Error("브라우저가 스트리밍 응답을 지원하지 않습니다.");
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let buffer = "";
+        els.activityDetail.textContent = "SSE 실시간 연결됨";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          buffer = buffer.replace(/\r\n/g, "\n");
+          let boundary;
+          while ((boundary = buffer.indexOf("\n\n")) >= 0) {
+            const block = buffer.slice(0, boundary).trim();
+            buffer = buffer.slice(boundary + 2);
+            if (block) parseSSEBlock(block);
+          }
+        }
+
+        buffer += decoder.decode();
+        if (buffer.trim()) parseSSEBlock(buffer.trim());
+        if (run.stopped) return;
+
+        completeStage(5, "인사이트 리포트를 완성했어요");
+        run.paper = run.paper || findPaperObject(run.finalParams);
+        if (!run.paper) {
+          for (let i = run.updates.length - 1; i >= 0 && !run.paper; i--) run.paper = findPaperObject(run.updates[i]);
+        }
+        if (!run.paper) {
+          for (const value of Object.values(run.messageBuffers)) {
+            const candidate = findPaperObject(value);
+            if (candidate) { run.paper = candidate; break; }
+          }
+        }
+        if (!run.paper) throw new Error("최종 논문 분석 JSON을 찾지 못했습니다.");
+
+        window.clearInterval(timerHandle);
+        els.agentOrb.classList.remove("running");
+        els.activityStatus.textContent = "ANALYSIS COMPLETE";
+        els.activityTitle.textContent = "연구 인사이트가 완성됐어요";
+        els.activityCopy.textContent = "Agent가 찾고 검증한 논문의 핵심 수치와 근거를 확인해 보세요.";
+        els.activityDetail.textContent = `총 ${els.timer.textContent} 소요`;
+        els.streamIndicator.hidden = true;
+        await new Promise(resolve => setTimeout(resolve, 650));
+        renderPaper(run.paper);
+        showView("result");
+      } catch (error) {
+        window.clearInterval(timerHandle);
+        if (error.name === "AbortError" || run.stopped) return;
+        showRunError(error);
+      } finally {
+        abortController = null;
+      }
+    }
+
+    function showRunError(error) {
+      els.agentOrb.classList.remove("running");
+      els.activityStatus.textContent = "CONNECTION PAUSED";
+      els.activityTitle.textContent = "분석을 완료하지 못했어요";
+      els.activityCopy.textContent = "연결 상태나 Agent 설정을 확인한 뒤 다시 시도해 주세요.";
+      els.activityDetail.textContent = "SSE 연결 종료";
+      els.streamIndicator.hidden = true;
+      els.stopButton.disabled = true;
+      els.errorMessage.textContent = error?.message || "알 수 없는 오류가 발생했습니다.";
+      els.errorCard.hidden = false;
+      console.error("[Paper Insight] Agent 실행 실패", error);
+    }
+
+    function stopAgent() {
+      if (!abortController) return;
+      run.stopped = true;
+      abortController.abort();
+      window.clearInterval(timerHandle);
+      els.agentOrb.classList.remove("running");
+      els.activityStatus.textContent = "STOPPED";
+      els.activityTitle.textContent = "분석을 중지했어요";
+      els.activityCopy.textContent = "새로운 검색을 시작하거나 같은 질문으로 다시 시도할 수 있어요.";
+      els.activityDetail.textContent = "사용자가 실행을 중지함";
+      els.streamIndicator.hidden = true;
+      els.stopButton.disabled = true;
+      els.stopButton.textContent = "중지됨";
+      els.errorTitle.textContent = "분석이 중지됐어요";
+      els.errorMessage.textContent = "다시 시도하면 처음부터 새 세션으로 실행됩니다.";
+      els.errorCard.hidden = false;
+    }
+
+    function normalizeArray(value) {
+      if (Array.isArray(value)) return value;
+      if (value === null || value === undefined || value === "") return [];
+      return [value];
+    }
+
+    function renderPaper(paperInput) {
+      const paper = deepParse(paperInput);
+      const titleKo = paper.title_ko || paper.title || paper.title_original || "제목을 확인하지 못했습니다";
+      const titleOriginal = paper.title_original && paper.title_original !== titleKo ? paper.title_original : "";
+      const status = paper.status || "success";
+      const docType = paper.document_type || "original_research";
+
+      $("#paperKicker").innerHTML = [paper.arxiv_id ? `arXiv ${escapeHTML(paper.arxiv_id)}` : "", docType === "original_research" ? "Original Research" : escapeHTML(docType)].filter(Boolean).map(item => `<span>${item}</span>`).join("");
+      $("#paperTitle").textContent = titleKo;
+      $("#paperOriginal").textContent = titleOriginal;
+      $("#paperOriginal").hidden = !titleOriginal;
+      $("#paperSummary").textContent = paper.one_line_summary || paper.abstract || "논문 요약이 제공되지 않았습니다.";
+
+      const links = [];
+      const absUrl = safeUrl(paper.abs_url);
+      const pdfUrl = safeUrl(paper.pdf_url);
+      if (absUrl) links.push(`<a class="paper-link" href="${escapeHTML(absUrl)}" target="_blank" rel="noopener noreferrer">초록 보기 ↗</a>`);
+      if (pdfUrl) links.push(`<a class="paper-link" href="${escapeHTML(pdfUrl)}" target="_blank" rel="noopener noreferrer">PDF 열기 ↗</a>`);
+      $("#paperLinks").innerHTML = links.join("");
+
+      const banner = $("#statusBanner");
+      if (status !== "success") {
+        const messages = {
+          insufficient_content: "PDF 본문을 충분히 확인하지 못한 상태의 분석입니다. 표시된 근거와 수치를 원문에서 한 번 더 확인해 주세요.",
+          id_mismatch: "입력된 arXiv ID와 PDF에서 확인된 ID가 일치하지 않습니다.",
+          unsupported_document: "원저 연구가 아닌 문서로 분류되었습니다.",
+          tool_error: "PDF 분석 도구 실행이 완료되지 않았습니다."
+        };
+        banner.innerHTML = `<strong>확인 필요</strong><span>${escapeHTML(messages[status] || `분석 상태: ${status}`)}</span>`;
+        banner.hidden = false;
+        $("#completionText").textContent = "Agent 분석 결과를 확인해 주세요";
+      } else {
+        banner.hidden = true;
+        $("#completionText").textContent = "Agent 분석이 완료됐어요";
+      }
+
+      renderMetrics(normalizeArray(paper.key_metrics));
+      renderFlow(normalizeArray(paper.research_flow));
+      renderReasons(normalizeArray(paper.selection_reason));
+      renderSummaries(normalizeArray(paper.summary));
+      renderEvidence(normalizeArray(paper.impact_evidence));
+      renderVisuals(normalizeArray(paper.visual_candidates));
+      renderLimitations(normalizeArray(paper.limitations));
+    }
+
+    function renderMetrics(metrics) {
+      const grid = $("#metricGrid");
+      if (!metrics.length) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">PDF에서 화면에 표시할 정량 지표가 확인되지 않았습니다.</div>`;
+        return;
+      }
+      grid.innerHTML = metrics.slice(0, 8).map(metric => {
+        const proposed = Number(metric.proposed_value);
+        const baseline = metric.baseline_value === null || metric.baseline_value === undefined ? null : Number(metric.baseline_value);
+        const hasProposed = Number.isFinite(proposed);
+        const hasBaseline = Number.isFinite(baseline);
+        const max = Math.max(Math.abs(hasProposed ? proposed : 0), Math.abs(hasBaseline ? baseline : 0), .000001);
+        const proposedWidth = hasProposed ? Math.max(5, Math.min(100, Math.abs(proposed) / max * 100)) : 0;
+        const baselineWidth = hasBaseline ? Math.max(5, Math.min(100, Math.abs(baseline) / max * 100)) : 0;
+        const source = [metric.section, metric.page ? `p.${metric.page}` : ""].filter(Boolean).join(" · ");
+        return `<article class="metric-card">
+          <div class="metric-top"><span class="metric-type">${escapeHTML(metric.type || "Other")}</span><span class="metric-source">${escapeHTML(source)}</span></div>
+          <div class="metric-name">${escapeHTML(metric.metric || "Key metric")}</div>
+          <div class="metric-value">${escapeHTML(metric.display_value || (hasProposed ? `${proposed}${metric.unit || ""}` : "—"))}</div>
+          <div class="metric-description">${escapeHTML(metric.description || "논문에서 확인된 정량 지표")}</div>
+          <div class="bar-wrap">
+            ${hasProposed ? `<div class="bar-row proposed"><span class="bar-label">제안</span><div class="bar-track"><div class="bar-value" style="width:${proposedWidth}%"></div></div></div>` : ""}
+            ${hasBaseline ? `<div class="bar-row"><span class="bar-label">기준</span><div class="bar-track"><div class="bar-value" style="width:${baselineWidth}%"></div></div></div>` : ""}
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function renderFlow(items) {
+      const list = $("#flowList");
+      if (!items.length) { list.innerHTML = `<div class="empty-state">연구 흐름 정보가 제공되지 않았습니다.</div>`; return; }
+      list.innerHTML = items.slice(0, 6).map((item, index) => `<div class="flow-item"><div class="flow-index">${String(index + 1).padStart(2, "0")}</div><div class="flow-copy">${escapeHTML(typeof item === "string" ? item : item.description || item.point || "")}</div></div>`).join("");
+    }
+
+    function renderReasons(items) {
+      const grid = $("#reasonGrid");
+      if (!items.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">선정 이유가 제공되지 않았습니다.</div>`; return; }
+      grid.innerHTML = items.map(item => `<article class="reason-card"><span class="reason-check">✓</span><span>${escapeHTML(typeof item === "string" ? item : item.reason || item.description || "")}</span></article>`).join("");
+    }
+
+    function renderSummaries(items) {
+      const list = $("#summaryList");
+      if (!items.length) { list.innerHTML = `<div class="empty-state">핵심 요약이 제공되지 않았습니다.</div>`; return; }
+      list.innerHTML = items.map((item, index) => {
+        const object = typeof item === "object" && item !== null ? item : { summary_item: String(item) };
+        const title = object.summary_item || object.point || object.description || `핵심 내용 ${index + 1}`;
+        const description = object.description && object.description !== title ? object.description : "";
+        const source = object.source || [object.section, object.page ? `page ${object.page}` : ""].filter(Boolean).join(", ");
+        return `<article class="summary-card ${index === 0 ? "open" : ""}">
+          <button class="summary-button" type="button" aria-expanded="${index === 0 ? "true" : "false"}">
+            <span><span class="summary-category">${escapeHTML(object.category || "Key insight")}</span><span class="summary-title">${escapeHTML(title)}</span></span>
+            <span class="summary-toggle" aria-hidden="true">+</span>
+          </button>
+          <div class="summary-body">${description ? `<div>${escapeHTML(description)}</div>` : ""}${object.quote_original ? `<div class="quote">“${escapeHTML(object.quote_original)}”</div>` : ""}${source ? `<div class="source">${escapeHTML(source)}</div>` : ""}</div>
+        </article>`;
+      }).join("");
+
+      list.querySelectorAll(".summary-button").forEach(button => {
+        button.addEventListener("click", () => {
+          const card = button.closest(".summary-card");
+          const open = card.classList.toggle("open");
+          button.setAttribute("aria-expanded", String(open));
+        });
+      });
+    }
+
+    function renderEvidence(items) {
+      const grid = $("#evidenceGrid");
+      if (!items.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">외부 영향력 근거가 제공되지 않았습니다.</div>`; return; }
+      grid.innerHTML = items.map(item => {
+        const object = typeof item === "object" && item !== null ? item : { claim: String(item) };
+        const url = safeUrl(object.url);
+        const tag = url ? "a" : "article";
+        const attrs = url ? `href="${escapeHTML(url)}" target="_blank" rel="noopener noreferrer"` : "";
+        return `<${tag} class="evidence-card" ${attrs}><div class="evidence-domain">${escapeHTML(url ? domainOf(url) : "확인된 근거")}</div><div class="evidence-claim">${escapeHTML(object.claim || object.description || "")}</div>${url ? `<div class="evidence-url">${escapeHTML(url)} ↗</div>` : ""}</${tag}>`;
+      }).join("");
+    }
+
+    function renderVisuals(items) {
+      const grid = $("#visualGrid");
+      if (!items.length) { grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">추출 대상으로 지정된 Figure, Table 또는 Equation이 없습니다.</div>`; return; }
+      grid.innerHTML = items.slice(0, 5).map(item => `<article class="visual-card"><div class="visual-type">${escapeHTML(item.type || "visual")} · ${item.page ? `page ${escapeHTML(item.page)}` : "page —"}</div><div class="visual-label">${escapeHTML(item.label || item.figure || "Visual candidate")}</div><div class="visual-caption">${escapeHTML(item.caption || item.description || "")}</div>${item.reason ? `<div class="visual-reason">${escapeHTML(item.reason)}</div>` : ""}</article>`).join("");
+    }
+
+    function renderLimitations(items) {
+      const list = $("#limitationsList");
+      if (!items.length) { list.innerHTML = `<div style="color:var(--text-3); text-align:center">논문에서 직접 확인된 한계가 제공되지 않았습니다.</div>`; return; }
+      list.innerHTML = items.map(item => `<div class="limitation"><span class="limitation-dot"></span><span>${escapeHTML(typeof item === "string" ? item : item.description || item.point || "")}</span></div>`).join("");
+    }
+
+    function showToast(message) {
+      window.clearTimeout(toastHandle);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastHandle = window.setTimeout(() => els.toast.classList.remove("show"), 2300);
+    }
+
+    function goHome() {
+      if (abortController) stopAgent();
+      showView("search");
+      window.setTimeout(() => els.userInput.focus(), 250);
+    }
+
+    els.searchForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const query = els.userInput.value.trim();
+      if (!query) { showToast("궁금한 연구 주제를 입력해 주세요."); els.userInput.focus(); return; }
+      startAgent(query);
+    });
+
+    document.querySelectorAll(".suggestion").forEach(button => {
+      button.addEventListener("click", () => {
+        els.userInput.value = button.textContent.trim();
+        els.userInput.focus();
+      });
+    });
+
+    els.stopButton.addEventListener("click", stopAgent);
+    els.retryButton.addEventListener("click", () => lastQuery && startAgent(lastQuery));
+    $("#newSearchButton").addEventListener("click", goHome);
+    $("#brandButton").addEventListener("click", goHome);
+
+    renderTimeline();
+    if (location.protocol === "file:") {
+      console.info("[Paper Insight] file:// 환경에서는 브라우저 보안 정책이 다를 수 있습니다. 실제 배포 주소 또는 localhost 사용을 권장합니다.");
+    }
+  </script>
+</body>
+</html>
